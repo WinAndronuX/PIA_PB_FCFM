@@ -18,7 +18,8 @@ class App:
                 self.currencies = data['data']
 
         else:
-            os.mkdir('data')
+            if not os.path.exists('data'):
+                os.mkdir('data')
 
             data = self.api.currencies()
             self.currencies = data['data']
@@ -51,7 +52,15 @@ class App:
 
     def convert(self, amount: float, base_currency: str, currencies: list[str]):
 
+        if base_currency not in self.currencies.keys():
+            print('Codigo de moneda base invalido: ' + base_currency)
+            return
+
         for currency in currencies:
+
+            if currency not in self.currencies.keys():
+                print('Codigo de moneda objetivo invalido: ' + currency)
+                return
 
             result = self.get_exchange_rate(base_currency, currency) * amount
 
