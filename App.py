@@ -1,5 +1,6 @@
 import json
 import os.path
+from datetime import datetime
 import freecurrencyapi
 
 class App:
@@ -8,6 +9,7 @@ class App:
         self.api = freecurrencyapi.Client(api_key)
         self.currencies = {}
         self.exchanges = {}
+        self.historical = {}
 
     def load_data(self):
         currencies_path = 'data/currencies.json'
@@ -49,6 +51,22 @@ class App:
             self.exchanges[base_currency] = response['data']
 
         return self.exchanges[base_currency][target_currency]
+
+    def get_historical_exchange_rate(self, base_currency: str, target_currency: str, date: str) -> float:
+
+        if datetime.now().strftime('%Y-%m-%d') == date:
+            return self.get_exchange_rate(base_currency, target_currency)
+        else:
+
+            if date not in self.historical:
+                self.historical[date] = {}
+
+            if base_currency not in self.historical[date]:
+
+                response = self.api.historical(date, base_currency)
+                self.historical[date][base_currency] = response['data'][date]
+
+            return self.historical[date][base_currency][target_currency]
 
     def convert(self, amount: float, base_currency: str, currencies: list[str]):
 
