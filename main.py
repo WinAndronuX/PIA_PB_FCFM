@@ -44,14 +44,20 @@ def show_help():
 def main():
 
     app = App('fca_live_kLDaZSlSucLjUTwctTPP7XLkTToRMDil2pfJpLuo')
-    app.load_data()
+    try:
+        app.load_data()
+    except everapi.exceptions.IncorrectApikey:
+        print('API Error: API KEY Incorrecta')
+    except Exception as e:
+            print('Program Error: '+ str(e))
+
 
     while True: # Bucle infinito para simular una terminal.
 
         text_input = prompt()
         command = text_input[0] # La primera palabra de la lista es el comando.
 
-        try:
+        try:            
 
             if command == '':
                 continue
