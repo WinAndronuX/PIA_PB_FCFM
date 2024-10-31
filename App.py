@@ -83,4 +83,28 @@ class App:
             result = self.get_exchange_rate(base_currency, currency) * amount
 
             print(f'{self.currencies[currency]['name']} ({self.currencies[currency]['code']}) -> '
-                  f'{result:.2f} {self.currencies[currency]['symbol_native']}')
+                f'{result:.2f} {self.currencies[currency]['symbol_native']}')
+
+
+    def get_dates():
+        while True:
+            try:
+                # Pedir fecha de inicio
+                first_date = input("Ingrese la fecha de inicio (dd/mm/YYYY): ")
+                first_date_obj = datetime.strptime(first_date, "%d/%m/%Y")
+                
+                # Pedir fecha de fin
+                last_date = input("Ingrese la fecha de fin (dd/mm/YYYY): ")
+                last_date_obj = datetime.strptime(last_date, "%d/%m/%Y")
+                
+                # Verificar que la fecha de fin sea posterior a la de inicio
+                if last_date_obj < first_date_obj:
+                    print("La fecha de fin debe ser posterior a la fecha de inicio. Intente de nuevo.")
+                    continue
+
+                # Devolver las fechas en formato cadena
+                return last_date, first_date
+            except ValueError:
+                print("Formato de fecha incorrecto. Asegúrese de usar dd/mm/YYYY.")
+
+
