@@ -40,7 +40,6 @@ def show_help():
     
     quit,q:     Sale del programa''')
 
-
 def main():
 
     app = App('fca_live_kLDaZSlSucLjUTwctTPP7XLkTToRMDil2pfJpLuo')
@@ -74,6 +73,9 @@ def main():
                 app.supported_currencies()
             elif command == 'search':
                 app.search_currency(text_input[1])
+            elif command == "hist":
+                app.get_dates()
+                app.get_historical_exchange_rate()
             else:
                 print('Comando invalido. Por favor escriba "help" o "?" para obtener ayuda.')
 

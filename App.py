@@ -85,7 +85,6 @@ class App:
             print(f'{self.currencies[currency]['name']} ({self.currencies[currency]['code']}) -> '
                 f'{result:.2f} {self.currencies[currency]['symbol_native']}')
 
-
     def get_dates():
         while True:
             try:
