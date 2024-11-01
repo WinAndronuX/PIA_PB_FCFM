@@ -13,9 +13,18 @@ def prompt() -> list[str]:
 
 # Funcion que recibe el patron, usando regex, que debe de tener el texto despues del comando "conv" para funcionar
 def validate_conv_syntax(text):
-    pattern = r"^\d+\s[a-zA-Z]{3}\sto\s[a-zA-Z]{3}(,[a-zA-Z]{3})*$"
+    pattern = r"\d+\s[a-zA-Z]{3}\sto\s[a-zA-Z]{3}(,[a-zA-Z]{3})*"
     return re.match(pattern, text)
 
+
+def validate_stats_syntax(text):
+    date_pattern = r'(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])'
+    pattern = r'^[a-zA-Z]{3}\s+vs\s[a-zA-Z]{3}(,[a-zA-Z]{3})*\s+start_date\s+' + date_pattern + r'\s+end_date\s+' + date_pattern + r'$'
+    return re.match(pattern, text)
+
+
+def welcome_message():
+    return 'Bienvenido. Porfavor escriba "help" o "?" para recibir ayuda sobre como usar el programa.'
 
 def show_help():
     print('''Mensaje de Ayuda
@@ -26,6 +35,12 @@ def show_help():
                 Ejemplos de uso:
                     - conv 1 USD to MXN
                     - conv 1 EUR to USD,MXN,JPY
+    
+    stats:      Calcula el porcentaje de cambio (devaluacion) de una moneda frente a otra
+                
+                Uso: stats [moneda base] vs [moneda/s objetivo] start_date [formato: YYYY-MM-DD] end_date [formato: YYYY-MM-DD]
+                Ejemplos de uso:
+                    - stats USD vs MXN,JPY,EUR start_date 2023-01-01 end_date 2023-12-31
     
     supported:  Muestra todas las monedas disponibles, su nombre, simbolo y codigo
     
@@ -50,6 +65,7 @@ def main():
     except Exception as e:
             print('Program Error: '+ str(e))
 
+    print(welcome_message())
 
     while True: # Bucle infinito para simular una terminal.
 
@@ -69,13 +85,15 @@ def main():
                     app.convert(float(text_input[1]), text_input[2].upper(), text_input[4].upper().split(',')) # Convertimos las monedas automaticamente a mayusculas
                 else:
                     print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')
+            elif command == 'stats':
+                if validate_stats_syntax(' '.join(text_input[1:])):
+                    app.stats(text_input[1], text_input[3].split(','), text_input[5], text_input[7])
+                else:
+                    print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')
             elif command == 'supported':
                 app.supported_currencies()
             elif command == 'search':
                 app.search_currency(text_input[1])
-            elif command == "hist":
-                app.get_dates()
-                app.get_historical_exchange_rate()
             else:
                 print('Comando invalido. Por favor escriba "help" o "?" para obtener ayuda.')
 

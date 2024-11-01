@@ -3,6 +3,11 @@ import os.path
 from datetime import datetime
 import freecurrencyapi
 
+def devaluation_rate(initial_value, end_value):
+    percentage_of_change = ((end_value - initial_value) / initial_value) * 100
+    return percentage_of_change
+
+
 class App:
 
     def __init__(self, api_key: str):
@@ -83,27 +88,39 @@ class App:
             result = self.get_exchange_rate(base_currency, currency) * amount
 
             print(f'{self.currencies[currency]['name']} ({self.currencies[currency]['code']}) -> '
-                f'{result:.2f} {self.currencies[currency]['symbol_native']}')
+                  f'{result:.2f} {self.currencies[currency]['symbol_native']}')
 
-    def get_dates():
-        while True:
-            try:
-                # Pedir fecha de inicio
-                first_date = input("Ingrese la fecha de inicio (dd/mm/YYYY): ")
-                first_date_obj = datetime.strptime(first_date, "%d/%m/%Y")
-                
-                # Pedir fecha de fin
-                last_date = input("Ingrese la fecha de fin (dd/mm/YYYY): ")
-                last_date_obj = datetime.strptime(last_date, "%d/%m/%Y")
-                
-                # Verificar que la fecha de fin sea posterior a la de inicio
-                if last_date_obj < first_date_obj:
-                    print("La fecha de fin debe ser posterior a la fecha de inicio. Intente de nuevo.")
-                    continue
+    def stats(self, base_currency: str, currencies: list[str], initial_date: str, end_date: str):
 
-                # Devolver las fechas en formato cadena
-                return last_date, first_date
-            except ValueError:
-                print("Formato de fecha incorrecto. Asegúrese de usar dd/mm/YYYY.")
+        date1 = datetime.strptime(initial_date, '%Y-%m-%d').date()
+        date2 = datetime.strptime(end_date, '%Y-%m-%d').date()
 
+        if date2 < date1:
+            print('end_date no puede ser menor que start_date')
+            return
+        elif date1 == date2:
+            print('start_date y end_date no pueden ser iguales')
+            return
+        elif date2 > datetime.now().date():
+            print('end_date no puede ser mayor que el dia actual')
+            return
 
+        if base_currency not in self.currencies.keys():
+            print('Codigo de moneda base invalido: ' + base_currency)
+            return
+
+        for currency in currencies:
+
+            if currency not in self.currencies.keys():
+                print('Codigo de moneda objetivo invalido: ' + currency)
+                return
+
+            exchange1 = self.get_historical_exchange_rate(base_currency, currency, initial_date)
+            exchange2 = self.get_historical_exchange_rate(base_currency, currency, end_date)
+
+            result = devaluation_rate(exchange1, exchange2)
+
+            print(f'''{self.currencies[currency]['name']} ({self.currencies[currency]['code']}):
+    Exchange rate at {initial_date}: {exchange1:.2f} {self.currencies[currency]['symbol_native']}
+    Exchange rate at {end_date}: {exchange2:.2f} {self.currencies[currency]['symbol_native']}
+    Devaluation: {result:+.2f} %''')
