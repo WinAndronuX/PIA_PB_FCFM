@@ -55,6 +55,9 @@ def show_help():
     
     quit,q:     Sale del programa''')
 
+def saludoEco():
+    print("Hola soy eco")
+
 def main():
 
     app = App('fca_live_kLDaZSlSucLjUTwctTPP7XLkTToRMDil2pfJpLuo')
