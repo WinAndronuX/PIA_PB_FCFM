@@ -13,7 +13,7 @@ def prompt() -> list[str]:
 
 # Funcion que recibe el patron, usando regex, que debe de tener el texto despues del comando "conv" para funcionar
 def validate_conv_syntax(text):
-    pattern = r"\d+\s[a-zA-Z]{3}\sto\s[a-zA-Z]{3}(,[a-zA-Z]{3})*"
+    pattern = r"^\d+\s[a-zA-Z]{3}\sto\s[a-zA-Z]{3}(,[a-zA-Z]{3})*$"
     return re.match(pattern, text)
 
 
