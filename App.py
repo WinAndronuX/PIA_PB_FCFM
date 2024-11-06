@@ -194,4 +194,47 @@ class App:
             
             i += 1
 
+        hojaConversiones = wb.create_sheet("Datos_Conv")
+
+        hojaConversiones['A1'] = "Moneda base"
+        hojaConversiones['B1'] = "Moneda de cambio"
+        hojaConversiones['C1'] = "Tipo de cambio"
+
+        i=2
+
+        for clave, valor in self.exchanges.items():
+            hojaConversiones[f'A{i}'] = clave
+            for clave2, valor2 in valor.items():
+                hojaConversiones[f'B{i}'] = clave2
+                hojaConversiones[f'C{i}'] = valor2
+
+                i += 1
+            
+            i += 1
+
+        # print(self.historical)
+
+        hojaHistorical = wb.create_sheet("Datos_Stats")
+
+        hojaHistorical['A1'] = "Fecha"
+        hojaHistorical['B1'] = "Moneda base"
+        hojaHistorical['C1'] = "Moneda de cambio"
+        hojaHistorical['D1'] = "Tipo de cambio"
+
+        i=2
+
+        for clave, valor in self.historical.items():
+            hojaHistorical[f'A{i}'] = clave
+            for clave2, valor2 in valor.items():
+                hojaHistorical[f'B{i}'] = clave2
+                for clave3, valor3 in valor2.items():
+                    hojaHistorical[f'C{i}'] = clave3
+                    hojaHistorical[f'D{i}'] = valor3
+
+                    i += 1
+
+                i += 1
+                
+            i += 1
+
         wb.save("Historial.xlsx")
