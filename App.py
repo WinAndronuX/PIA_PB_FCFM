@@ -2,6 +2,7 @@ import json
 import os.path
 from datetime import datetime
 import freecurrencyapi
+from openpyxl import Workbook
 
 def devaluation_rate(initial_value, end_value):
     percentage_of_change = ((end_value - initial_value) / initial_value) * 100
@@ -15,6 +16,11 @@ class App:
         self.currencies = {}
         self.exchanges = {}
         self.historical = {}
+        self.historial = {"fecha": datetime.now().strftime("%d/%m/%Y"), "comandos": {}}
+
+    def save_command(self, command, result = ""):
+        self.historial["comandos"][datetime.now().strftime("%H:%M:%S")] = (command, result)
+        pass
 
     def load_data(self):
         currencies_path = 'data/currencies.json'
@@ -37,16 +43,28 @@ class App:
 
     def supported_currencies(self):
 
+        resArray = []
+
         for code, currency in self.currencies.items():
-            print(f'{code}: [{currency['symbol_native']}] - {currency['name']}')
+            res = (f'{code}: [{currency['symbol_native']}] - {currency['name']}')
+            print(res)
+            resArray.append(res)
+        
+        return resArray
 
     def search_currency(self, text: str):
+        
+        resArray = []
 
         for code, currency in self.currencies.items():
             name: str = currency['name']
 
             if text.lower() in name.lower():
-                print(f'{code}: [{currency['symbol_native']}] - {currency['name']}')
+                res = (f'{code}: [{currency['symbol_native']}] - {currency['name']}')
+                print(res)
+                resArray.append(res)
+
+        return resArray
 
     def get_exchange_rate(self, base_currency: str, target_currency: str) -> float:
 
@@ -75,20 +93,30 @@ class App:
 
     def convert(self, amount: float, base_currency: str, currencies: list[str]):
 
+        resArray = []
+
         if base_currency not in self.currencies.keys():
-            print('Codigo de moneda base invalido: ' + base_currency)
-            return
+            res = ('Codigo de moneda base invalido: ' + base_currency)
+            print(res)
+            return res
 
         for currency in currencies:
 
             if currency not in self.currencies.keys():
-                print('Codigo de moneda objetivo invalido: ' + currency)
-                return
+                res = ('Codigo de moneda objetivo invalido: ' + currency)
+                print(res)
+                return res
 
             result = self.get_exchange_rate(base_currency, currency) * amount
 
-            print(f'{self.currencies[currency]['name']} ({self.currencies[currency]['code']}) -> '
-                  f'{result:.2f} {self.currencies[currency]['symbol_native']}')
+            res = (f'{self.currencies[currency]['name']} ({self.currencies[currency]['code']}) -> '
+                f'{result:.2f} {self.currencies[currency]['symbol_native']}')
+
+            resArray.append(res)
+            
+            print(res)
+
+        return resArray
 
     def stats(self, base_currency: str, currencies: list[str], initial_date: str, end_date: str):
 
@@ -96,31 +124,74 @@ class App:
         date2 = datetime.strptime(end_date, '%Y-%m-%d').date()
 
         if date2 < date1:
-            print('end_date no puede ser menor que start_date')
-            return
+            res ='end_date no puede ser menor que start_date'
+            print(res)
+            return res
         elif date1 == date2:
-            print('start_date y end_date no pueden ser iguales')
-            return
+            res ='start_date y end_date no pueden ser iguales'
+            print(res)
+            return res
         elif date2 > datetime.now().date():
-            print('end_date no puede ser mayor que el dia actual')
-            return
+            res = 'end_date no puede ser mayor que el dia actual'
+            print(res)
+            return res
 
         if base_currency not in self.currencies.keys():
-            print('Codigo de moneda base invalido: ' + base_currency)
-            return
+            res = 'Codigo de moneda base invalido: ' + base_currency
+            print(res)
+            return res
+
+        resArray = []
 
         for currency in currencies:
-
+            
             if currency not in self.currencies.keys():
-                print('Codigo de moneda objetivo invalido: ' + currency)
-                return
+                res = 'Codigo de moneda base invalido: ' + base_currency
+                print(res)
+                return res
 
             exchange1 = self.get_historical_exchange_rate(base_currency, currency, initial_date)
             exchange2 = self.get_historical_exchange_rate(base_currency, currency, end_date)
 
             result = devaluation_rate(exchange1, exchange2)
 
-            print(f'''{self.currencies[currency]['name']} ({self.currencies[currency]['code']}):
+            res = (f'''{self.currencies[currency]['name']} ({self.currencies[currency]['code']}):
     Exchange rate at {initial_date}: {exchange1:.2f} {self.currencies[currency]['symbol_native']}
     Exchange rate at {end_date}: {exchange2:.2f} {self.currencies[currency]['symbol_native']}
     Devaluation: {result:+.2f} %''')
+            
+            print(res)
+
+            resArray.append(res)
+
+        return resArray
+
+    def export_Historial(self):
+
+        wb = Workbook()
+
+        hoja = wb.active
+
+        hoja.title = f'Historial {datetime.now().strftime("%d-%m-%Y")}'
+        hoja['A1'] = "Hora"
+        hoja['B1'] = "Comando"
+        hoja['C1'] = "Resultado"
+
+        i = 2
+
+        for clave, valor in self.historial["comandos"].items():
+            hoja[f'A{i}'] = clave
+            hoja[f'B{i}'] = valor[0]
+            if isinstance(valor[1], list):
+                for element in valor[1]:
+                    hoja[(f'C{i}')] = element
+                    i += 1
+            elif isinstance(valor[1], str):
+                hoja[(f'C{i}')] = valor[1]
+                i += 1
+            else:
+                print("Error")
+            
+            i += 1
+
+        wb.save("Historial.xlsx")

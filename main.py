@@ -77,23 +77,34 @@ def main():
             if command == '':
                 continue
             elif command == 'quit' or command == 'q': # Si el usuario ingresa "quit" o "q", sale del bucle y por ende del programa.
-                break
+                if app.historial["comandos"] == {}:
+                    break
+                else:
+                    export = input("¿Quieres exportar el historial de hoy? S - Si, N - No \n \n >").upper()
+                    if export == "S":
+                        app.export_Historial()
+                    break
             elif command == 'help' or command == '?':
                 show_help()
+                app.save_command(" ".join(text_input))
             elif command == "conv":
                 if validate_conv_syntax(' '.join(text_input[1:])):
-                    app.convert(float(text_input[1]), text_input[2].upper(), text_input[4].upper().split(',')) # Convertimos las monedas automaticamente a mayusculas
+                    res = app.convert(float(text_input[1]), text_input[2].upper(), text_input[4].upper().split(',')) # Convertimos las monedas automaticamente a mayusculas
+                    app.save_command(" ".join(text_input), res)
                 else:
                     print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')
             elif command == 'stats':
                 if validate_stats_syntax(' '.join(text_input[1:])):
-                    app.stats(text_input[1], text_input[3].split(','), text_input[5], text_input[7])
+                    res = app.stats(text_input[1], text_input[3].split(','), text_input[5], text_input[7])
+                    app.save_command(" ".join(text_input), res)
                 else:
                     print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')
             elif command == 'supported':
-                app.supported_currencies()
+                res = app.supported_currencies()
+                app.save_command(" ".join(text_input), res)
             elif command == 'search':
-                app.search_currency(text_input[1])
+                res = app.search_currency(text_input[1])
+                app.save_command(" ".join(text_input), res)
             else:
                 print('Comando invalido. Por favor escriba "help" o "?" para obtener ayuda.')
 
