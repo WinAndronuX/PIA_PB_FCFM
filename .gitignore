@@ -1,6 +1,10 @@
+#Carpetas
 data/
-.venv
-.idea
+venv/
+__pycache__/
 
+# Archivos
+.idea
 .idea/*
 .venv/*
+test.py

@@ -22,6 +22,14 @@ def validate_stats_syntax(text):
     pattern = r'^[a-zA-Z]{3}\s+vs\s[a-zA-Z]{3}(,[a-zA-Z]{3})*\s+start_date\s+' + date_pattern + r'\s+end_date\s+' + date_pattern + r'$'
     return re.match(pattern, text)
 
+def validate_graph_conv_syntax(text):
+    pattern =  r'^[a-zA-Z]{3}\sto\s[a-zA-Z]{3}(,[a-zA-Z]{3})*$'
+    return re.match(pattern, text)
+
+def validate_graph_historia_stats_syntax(text):
+    pattern =  r'^[a-zA-Z]{3}\sto\s[a-zA-Z]{3}$'
+    return re.match(pattern, text)
+
 
 def welcome_message():
     return 'Bienvenido. Porfavor escriba "help" o "?" para recibir ayuda sobre como usar el programa.'
@@ -50,6 +58,17 @@ def show_help():
                 Ejemplos de uso:
                     - search peso
                     - search dollar
+    
+    graph:      Te permite hacer graficas de los tipos de cambio, el historial de cambio de una moneda a lo largo del año y su devaluación
+                Uso: graph [tipo de grafico] [parametros de tipo de grafico]
+                Tipos: 
+                    - conv [moneda base] to [monedas objetivo]
+                    - historial [moneda base] to [moneda objetivo]
+                    - stats [moneda base] to [moneda objetivo]
+                Ejemplos de uso:
+                    - graph conv USD to MXN,EUR,JPY
+                    - graph historia USD to MXN
+                    - graph stats USD to MXN
     
     help,?:     Muestra este mensaje de ayuda
     
@@ -105,6 +124,27 @@ def main():
             elif command == 'search':
                 res = app.search_currency(text_input[1])
                 app.save_command(" ".join(text_input), res)
+            elif command == 'graph':
+                if text_input[1] == 'conv':
+                    if validate_graph_conv_syntax(' '.join(text_input[2:])):
+                        app.graph_conv(text_input[2].upper(), text_input[4].upper().split(','))
+                        app.save_command(" ".join(text_input), "convercion.png")
+                    else:
+                        print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')                    
+                elif text_input[1] == "historial":
+                    if validate_graph_historia_stats_syntax(' '.join(text_input[2:])):
+                        app.graph_historial(text_input[2].upper(), text_input[4].upper())
+                        app.save_command(" ".join(text_input), "historial.png")
+                    else:
+                        print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')    
+                elif text_input[1] == 'stats':
+                    if validate_graph_historia_stats_syntax(' '.join(text_input[2:])):
+                        app.graph_stats(text_input[2].upper(), text_input[4].upper())
+                        app.save_command(" ".join(text_input), "stats.png")
+                    else:
+                        print('Sintaxis incorrecta. Por favor escriba "help" o "?" para mostrar ayuda.')    
+                else:
+                    print("Comando graph invalido")
             else:
                 print('Comando invalido. Por favor escriba "help" o "?" para obtener ayuda.')
 

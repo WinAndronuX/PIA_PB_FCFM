@@ -3,6 +3,9 @@ import os.path
 from datetime import datetime
 import freecurrencyapi
 from openpyxl import Workbook
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def devaluation_rate(initial_value, end_value):
     percentage_of_change = ((end_value - initial_value) / initial_value) * 100
@@ -69,7 +72,6 @@ class App:
     def get_exchange_rate(self, base_currency: str, target_currency: str) -> float:
 
         if base_currency not in self.exchanges:
-
             response = self.api.latest(base_currency)
             self.exchanges[base_currency] = response['data']
 
@@ -238,3 +240,145 @@ class App:
             i += 1
 
         wb.save("Historial.xlsx")
+
+    # Seccion de graficas
+
+    def graph_conv(self, base_currency, currencys):
+
+        if base_currency not in self.currencies.keys():
+            res = ('Codigo de moneda base invalido: ' + base_currency)
+            print(res)
+            return res
+
+        values = []
+
+        for element in currencys:
+            if element not in self.currencies.keys():
+                res = ('Codigo de moneda base invalido: ' + element)
+                print(res)
+                return res
+        
+            res = self.get_exchange_rate(base_currency, element)
+            values.append(res)
+
+        # Crear el gráfico de barras
+        plt.figure(figsize=(10, 8))
+        plt.bar(currencys, values)
+
+        # Añadir etiquetas y título
+        plt.xlabel('Moneda')
+        plt.ylabel('Valor')
+        plt.title(f'Tasas de Cambio {base_currency}')
+
+        # Rotar las etiquetas del eje x para que no se solapen
+        plt.xticks(rotation=90)
+
+        # Mostrar el gráfico
+        plt.tight_layout()
+
+        nombre = './graficas/convercion.png'
+
+        plt.savefig(nombre)
+
+        print(f"Grafico creado en {nombre}")
+
+    def get_month_exchange(self, mes, año, base_currency, currency):
+
+        res = []
+
+        # Ajustamos la lógica para la fecha de la petición
+        for i in range(1, mes):
+
+            if i < 10:
+                fecha_peticion = f'{año}-0{i}-15'
+            else:
+                fecha_peticion = f'{año}-{i}-15'
+
+            # Hacer la petición para el tipo de cambio histórico
+            res.append(self.get_historical_exchange_rate(base_currency, currency, fecha_peticion))
+
+        # Obtener el tipo de cambio actual
+        res.append(self.get_exchange_rate(base_currency, currency))
+
+        return res
+
+    def graph_historial(self, base_currency, currency):
+
+        if base_currency not in self.currencies.keys():
+            res = ('Codigo de moneda base invalido: ' + base_currency)
+            print(res)
+            return res
+        
+        if currency not in self.currencies.keys():
+            res = ('Codigo de moneda base invalido: ' + currency)
+            print(res)
+            return res
+
+        fecha_actual = datetime.now()
+        mes = fecha_actual.month
+        año = fecha_actual.year
+
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
+        res = self.get_month_exchange(mes, año, base_currency, currency)
+
+        # Crear la gráfica
+        plt.figure(figsize=(16, 10))
+
+        # Crear la gráfica
+        plt.plot(meses[:mes], res, marker="o")  # Usamos 'marker' en vez de 'market'
+        plt.title(f"Gráfica de tipo de cambio {currency}-{base_currency}")
+        plt.xlabel("Meses")
+        plt.ylabel("Valor")
+        plt.xticks(rotation=45)
+
+        # Guardamos la gráfica como archivo PNG
+        nombre = "./graficas/historial.png"
+        plt.savefig(nombre)
+
+        print(f"Grafico creado en {nombre}")
+
+    def graph_stats(self, base_currency, currency):
+
+        if base_currency not in self.currencies.keys():
+            res = ('Codigo de moneda base invalido: ' + base_currency)
+            print(res)
+            return res
+        
+        if currency not in self.currencies.keys():
+            res = ('Codigo de moneda base invalido: ' + currency)
+            print(res)
+            return res
+
+        fecha_actual = datetime.now()
+        mes = fecha_actual.month
+        año = fecha_actual.year
+
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+
+        res = self.get_month_exchange(mes, año, base_currency, currency)
+
+        dev_rate = []
+
+        for i in range(len(res) - 1):
+            initial_value = res[i]
+            end_value = res[i + 1]
+            dev_rate.append(devaluation_rate(initial_value, end_value))
+
+        dev_rate_format = [round(n, 2) for n in dev_rate]
+        
+        # Crear la gráfica
+        plt.figure(figsize=(16, 10))
+
+        # Crear la gráfica
+        plt.bar(meses[:mes-1], dev_rate_format)  # Usamos 'marker' en vez de 'market'
+        plt.title(f"Devaluación mensual del {currency} frente al {base_currency}")
+        plt.xlabel("Meses")
+        plt.ylabel("Fluctuación")
+        plt.xticks(rotation=45)
+
+        # Guardamos la gráfica como archivo PNG
+        nombre = "./graficas/stats.png"
+        plt.savefig(nombre)
+
+        print(f"Grafico creado en {nombre}")
