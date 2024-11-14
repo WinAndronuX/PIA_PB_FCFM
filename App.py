@@ -4,6 +4,7 @@ from datetime import datetime
 import freecurrencyapi
 from openpyxl import Workbook
 import matplotlib
+from matplotlib import cm
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -263,7 +264,12 @@ class App:
 
         # Crear el gráfico de barras
         plt.figure(figsize=(10, 8))
-        plt.bar(currencys, values)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_facecolor('thistle')
+        colormap = cm.viridis
+        plt.bar(currencys, values,  color=colormap(range(len(values))), edgecolor='black', linewidth=1.3, hatch='//')
+        plt.grid(True, color='black', linestyle='--', linewidth=0.5)
 
         # Añadir etiquetas y título
         plt.xlabel('Moneda')
@@ -324,9 +330,14 @@ class App:
 
         # Crear la gráfica
         plt.figure(figsize=(16, 10))
+        plt.figure(figsize=(16, 10))
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_facecolor('lavender')
 
         # Crear la gráfica
-        plt.plot(meses[:mes], res, marker="o")  # Usamos 'marker' en vez de 'market'
+        plt.plot(meses[:mes], res, marker="D", markerfacecolor='lightpink', color='purple' ,linestyle='--', linewidth=2)  # Usamos 'marker' en vez de 'market'
+        plt.grid(True, color='black', linestyle=':', linewidth=0.5)
         plt.title(f"Gráfica de tipo de cambio {currency}-{base_currency}")
         plt.xlabel("Meses")
         plt.ylabel("Valor")
@@ -371,7 +382,12 @@ class App:
         plt.figure(figsize=(16, 10))
 
         # Crear la gráfica
-        plt.bar(meses[:mes-1], dev_rate_format)  # Usamos 'marker' en vez de 'market'
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_facecolor('lavender')
+        colormap = cm.coolwarm
+        plt.bar(meses[:mes-1], dev_rate_format, color=colormap(range(len(meses))), edgecolor='black', linewidth=1.3, hatch='x')  # Usamos 'marker' en vez de 'market'
+        plt.grid(True, color='black', linestyle='--', linewidth=0.5)
         plt.title(f"Devaluación mensual del {currency} frente al {base_currency}")
         plt.xlabel("Meses")
         plt.ylabel("Fluctuación")
