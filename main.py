@@ -67,7 +67,7 @@ def show_help():
                     - stats [moneda base] to [moneda objetivo]
                 Ejemplos de uso:
                     - graph conv USD to MXN,EUR,JPY
-                    - graph historia USD to MXN
+                    - graph historial USD to MXN
                     - graph stats USD to MXN
     
     help,?:     Muestra este mensaje de ayuda
